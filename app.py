@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Optional
+from typing import Optional
 from urllib.parse import quote
 
 import requests
@@ -38,15 +38,21 @@ def _base_url():
     return GITLAB_URL.rstrip("/") + API_PREFIX
 
 
-def get_user_id(user_id: str) -> int:
-    if not user_id:
-        raise HTTPException(status_code=400, detail="User id is required")
-    # Validate user exists by fetching it.
-    url = f"{_base_url()}/users/{quote(user_id, safe='')}"
-    resp = requests.get(url, headers=_headers(), timeout=TIMEOUT)
+def get_user_id(username: str) -> int:
+    if not username:
+        raise HTTPException(status_code=400, detail="Username is required")
+    url = f"{_base_url()}/users"
+    resp = requests.get(
+        url, headers=_headers(), params={"username": username}, timeout=TIMEOUT
+    )
     if resp.status_code != 200:
         raise HTTPException(status_code=resp.status_code, detail=resp.text)
-    return resp.json()["id"]
+    data = resp.json()
+    if not data:
+        raise HTTPException(
+            status_code=404, detail=f"User not found: {username}"
+        )
+    return data[0]["id"]
 
 
 def get_group_id(full_path: str) -> Optional[int]:
