@@ -17,7 +17,7 @@ if not GITLAB_URL or not GITLAB_TOKEN:
 
 API_PREFIX = "/api/v4"
 TIMEOUT = 10
-DEVELOPER_ACCESS = 30
+MAINTAINER_ACCESS = 40
 
 app = FastAPI(title="gitlab-reconciler", version="0.1.0")
 
@@ -94,14 +94,14 @@ def name_from_path(path: str) -> str:
 
 def add_user_to_group(group_id: int, user_id: int) -> str:
     url = f"{_base_url()}/groups/{group_id}/members"
-    payload = {"user_id": user_id, "access_level": DEVELOPER_ACCESS}
+    payload = {"user_id": user_id, "access_level": MAINTAINER_ACCESS}
     resp = requests.post(url, headers=_headers(), json=payload, timeout=TIMEOUT)
     if resp.status_code in (201, 200):
         return "added"
     if resp.status_code == 409:
-        # Already a member; ensure access level is at least developer.
+        # Already a member; ensure access level is at least maintainer.
         update_url = f"{_base_url()}/groups/{group_id}/members/{user_id}"
-        update_payload = {"access_level": DEVELOPER_ACCESS}
+        update_payload = {"access_level": MAINTAINER_ACCESS}
         update_resp = requests.put(
             update_url, headers=_headers(), json=update_payload, timeout=TIMEOUT
         )
