@@ -23,7 +23,7 @@ export WEBHOOK_TOKEN="<webhook-token>"
 export USER_PATH="users"
 export GROUP_PATH="groups"
 
-uvicorn app:app --host :: --port 8000
+uvicorn app:app --host "" --port 8000
 ```
 
 ## Webhook
@@ -43,8 +43,7 @@ Example payload:
 
 Notes:
 
-- Users are GitLab user IDs as strings.
 - Access level is set to Maintainer (40).
 - Send `Authorization: Bearer <WEBHOOK_TOKEN>` with the request.
-- If `USER_PATH` or `GROUP_PATH` are nested (contain `/`), they must already exist.
-- On GitLab SaaS, top-level groups cannot be created via the API; create parent groups in the UI first.
+- If `USER_PATH` or `GROUP_PATH` are nested (contain `/`), they must already
+  exist.
