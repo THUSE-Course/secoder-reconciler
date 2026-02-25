@@ -9,6 +9,8 @@ Simple webhook-driven microservice for reconciling GitLab groups and membership.
 - `WEBHOOK_TOKEN` (shared secret for `Authorization: Bearer <token>` header)
 - `USER_PATH` (parent path under which per-user groups are created)
 - `GROUP_PATH` (parent path under which named groups are created)
+- `USER_PREFIX` (prefix for per-user subgroup names, defaults to `u-`)
+- `GROUP_PREFIX` (prefix for named subgroup names, defaults to `g-`)
 
 ## Run
 
@@ -22,6 +24,8 @@ export GITLAB_TOKEN="<token>"
 export WEBHOOK_TOKEN="<webhook-token>"
 export USER_PATH="users"
 export GROUP_PATH="groups"
+export USER_PREFIX="u-"
+export GROUP_PREFIX="g-"
 
 uvicorn app:app --host "" --port 8000
 ```
@@ -47,3 +51,7 @@ Notes:
 - Send `Authorization: Bearer <WEBHOOK_TOKEN>` with the request.
 - If `USER_PATH` or `GROUP_PATH` are nested (contain `/`), they must already
   exist.
+- User subgroup names are created as `<USER_PREFIX><username>` (example:
+  `alice` -> `u-alice`).
+- Group subgroup names are created as `<GROUP_PREFIX><group_name>` (example:
+  `dod` -> `g-dod`).

@@ -10,6 +10,8 @@ GITLAB_TOKEN = os.getenv("GITLAB_TOKEN")
 WEBHOOK_TOKEN = os.getenv("WEBHOOK_TOKEN")
 USER_PATH = os.getenv("USER_PATH")
 GROUP_PATH = os.getenv("GROUP_PATH")
+USER_PREFIX = os.getenv("USER_PREFIX", "u-")
+GROUP_PREFIX = os.getenv("GROUP_PREFIX", "g-")
 
 if not GITLAB_URL or not GITLAB_TOKEN:
     # Defer hard failure until first request to make local dev easier.
@@ -92,6 +94,10 @@ def name_from_path(path: str) -> str:
     return path.rstrip("/").split("/")[-1]
 
 
+def prefixed_name(prefix: str, value: str) -> str:
+    return f"{prefix}{value}"
+
+
 def add_user_to_group(group_id: int, user_id: int) -> str:
     url = f"{_base_url()}/groups/{group_id}/members"
     payload = {"user_id": user_id, "access_level": MAINTAINER_ACCESS}
@@ -166,11 +172,12 @@ def webhook(
             GROUP_PATH, name_from_path(GROUP_PATH), GROUP_PATH, None
         )
 
-    for user_id_str in users:
-        user_id = get_user_id(user_id_str)
-        user_group_full_path = f"{USER_PATH}/{user_id_str}"
+    for username in users:
+        user_id = get_user_id(username)
+        subgroup_name = prefixed_name(USER_PREFIX, username)
+        user_group_full_path = f"{USER_PATH}/{subgroup_name}"
         user_group_id = get_or_create_group(
-            user_group_full_path, user_id_str, user_id_str, user_parent_id
+            user_group_full_path, subgroup_name, subgroup_name, user_parent_id
         )
         action = add_user_to_group(user_group_id, user_id)
         results.append(
@@ -182,12 +189,13 @@ def webhook(
         )
 
     for group_name, user_ids in groups.items():
-        group_full_path = f"{GROUP_PATH}/{group_name}"
+        subgroup_name = prefixed_name(GROUP_PREFIX, group_name)
+        group_full_path = f"{GROUP_PATH}/{subgroup_name}"
         group_id = get_or_create_group(
-            group_full_path, group_name, group_name, group_parent_id
+            group_full_path, subgroup_name, subgroup_name, group_parent_id
         )
-        for user_id_str in user_ids:
-            user_id = get_user_id(user_id_str)
+        for username in user_ids:
+            user_id = get_user_id(username)
             action = add_user_to_group(group_id, user_id)
             results.append(
                 {
