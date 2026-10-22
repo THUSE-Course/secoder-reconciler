@@ -21,7 +21,7 @@ API_PREFIX = "/api/v4"
 TIMEOUT = 10
 MAINTAINER_ACCESS = 40
 
-app = FastAPI(title="gitlab-reconciler", version="0.1.0")
+app = FastAPI(title="gitlab-reconciler", version="0.1.1")
 
 
 def _headers():
